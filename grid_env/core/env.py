@@ -3,6 +3,7 @@
 # @author: MZT
 # @time: 2023/3/30  18:16
 # @file name: env.py
+import math
 from typing import SupportsFloat, Any, Tuple, Dict
 
 import numpy as np
@@ -11,8 +12,8 @@ from gymnasium.spaces import Discrete, Box
 from matplotlib import pyplot as plt
 
 from grid_env.core.action import Action
-from grid_env.core.grid import Grid
-from grid_env.core.constants import ELEMENTS
+from grid_env.core.grid import Grid, X, Y
+from grid_env.core.constants import ELEMENTS, COLOR_MAP
 
 
 class GridEnv(Env):
@@ -80,10 +81,12 @@ class GridEnv(Env):
         plt.figure("render")
         plt.clf()
         plt.cla()
-        obstacles = self.grid.get_obstacles_points()
-        plt.scatter(obstacles[1], obstacles[0], marker="s", c='black')
-        plt.scatter(self.grid.agent_pos[1], self.grid.agent_pos[0], marker="s", c='red')
-        plt.scatter(self.grid.goal[1], self.grid.goal[0], marker="s", c='green')
+
+        grid_map = self.grid.grid.copy()
+        grid_map[self.grid.agent_pos[X], self.grid.agent_pos[Y]] = ELEMENTS.agent
+        grid_map[self.grid.goal[X], self.grid.goal[Y]] = ELEMENTS.goal
+        plt.imshow(grid_map, cmap=COLOR_MAP)
+
         plt.draw()
         plt.show(block=False)
         plt.pause(0.001)
@@ -111,7 +114,7 @@ class GridEnv(Env):
         goal = np.array(self.grid.goal)
 
         if self.grid.grid[agent_x][agent_y] == ELEMENTS.obstacle:
-            reward -= 1
+            reward -= 5
             info['collision'] = True
         else:
             agent_pos = self.grid.agent_pos = next_agent_pos
